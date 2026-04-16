@@ -1,9 +1,21 @@
+#:property TargetFramework=net10.0
+#:property RuntimeIdentifier=win-x64
+#:property PublishAot=true
+
 using System.Runtime.InteropServices;
 
-bool jiggleMouse = args.Length > 0 && args[0] == "--mouse";
+bool jiggleMouse = args.Contains("-m");
+
+double? hours = null;
+int hIdx = Array.IndexOf(args, "-h");
+if (hIdx >= 0 && hIdx + 1 < args.Length && double.TryParse(args[hIdx + 1], out double h))
+    hours = h;
+
+DateTime? stopAt = hours is not null ? DateTime.Now.AddHours(hours.Value) : null;
 
 Console.WriteLine("StayAwake started");
 Console.WriteLine($"Mouse jiggle: {(jiggleMouse ? "ON" : "OFF")}");
+Console.WriteLine(stopAt is not null ? $"Stopping at:  {stopAt:T}" : "Duration:     unlimited");
 Console.WriteLine("Press Ctrl+C to stop\n");
 
 NativeMethods.SetThreadExecutionState(
@@ -18,7 +30,7 @@ Console.CancelKeyPress += (s, e) =>
     NativeMethods.SetThreadExecutionState(ExecutionState.ES_CONTINUOUS);
 };
 
-while (true)
+while (stopAt is null || DateTime.Now < stopAt)
 {
     if (jiggleMouse)
     {
@@ -29,6 +41,9 @@ while (true)
 
     Thread.Sleep(30000);
 }
+
+Console.WriteLine("Time's up, stopping...");
+NativeMethods.SetThreadExecutionState(ExecutionState.ES_CONTINUOUS);
 
 static void MoveMouse(int dx, int dy)
 {
