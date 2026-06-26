@@ -95,5 +95,8 @@ Interactive native GDI UI — not practical to unit test. Verification is:
 ## Delivery
 
 After implementation and manual verification, rebuild/publish and **replace the
-current published artifact** (`artifacts\app\app.exe`) so the installed `stayawake`
-command runs the new screensaver-capable build.
+installed command** so `stayawake` runs the new screensaver-capable build:
+
+- `Get-Command stayawake` resolves to `C:\Users\fu.yu\tools\stayawake.exe`.
+- Copy the freshly published AOT executable over that path (and over the repo's
+  `artifacts\app\app.exe` if kept in sync).
